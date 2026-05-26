@@ -302,37 +302,24 @@
     if (window.electronAPI.onResponseDone) {
       window.electronAPI.onResponseDone(finishStream);
     }
-    // Legacy fallback
-    if (window.electronAPI.receiveResponse) {
-      window.electronAPI.receiveResponse((response) => {
-        addMessage(response, 'assistant');
-        status.textContent = 'Click to speak';
-        status.className = '';
-        speakResponse(response);
-      });
-    }
-  }
-
-  // ── Text-to-Speech ───────────────────────────────────────────
-  let currentUtterance = null;
-  function speakResponse(text) {
-    if (!('speechSynthesis' in window)) return;
-    window.speechSynthesis.cancel();
-    currentUtterance = new SpeechSynthesisUtterance(text);
-    currentUtterance.lang = 'en-US';
-    currentUtterance.rate = 1.0;
-    window.speechSynthesis.speak(currentUtterance);
   }
 
   // ── Kokoro TTS Audio Playback ────────────────────────────────
   let audioContext = null;
+  let activeTtsSources = [];
+
+  function stopAllTts() {
+    for (const src of activeTtsSources) {
+      try { src.stop(); } catch (e) { /* already stopped */ }
+    }
+    activeTtsSources = [];
+  }
 
   function playTtsAudio(base64Wav) {
     try {
       if (!audioContext) {
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
       }
-      // Resume if suspended (autoplay policy)
       if (audioContext.state === 'suspended') {
         audioContext.resume();
       }
@@ -340,26 +327,33 @@
       const len = binary.length;
       const bytes = new Uint8Array(len);
       for (let i = 0; i < len; i++) bytes[i] = binary.charCodeAt(i);
-      // Clone the buffer so we get the exact byte range
       const audioBuf = bytes.buffer.slice(0);
       audioContext.decodeAudioData(audioBuf, (buffer) => {
         const source = audioContext.createBufferSource();
         source.buffer = buffer;
         source.connect(audioContext.destination);
         source.start(0);
+        activeTtsSources.push(source);
+        source.onended = () => {
+          const idx = activeTtsSources.indexOf(source);
+          if (idx !== -1) activeTtsSources.splice(idx, 1);
+        };
       }, (err) => {
         console.error('TTS decode error:', err);
       });
     } catch (e) { console.error('TTS playback error:', e); }
   }
 
-  if (window.electronAPI && window.electronAPI.onTtsAudio) {
-    window.electronAPI.onTtsAudio(playTtsAudio);
-  }
-
-  // Streaming TTS audio
-  if (window.electronAPI && window.electronAPI.onTtsStreamAudio) {
-    window.electronAPI.onTtsStreamAudio(playTtsAudio);
+  if (window.electronAPI) {
+    if (window.electronAPI.onTtsAudio) {
+      window.electronAPI.onTtsAudio(playTtsAudio);
+    }
+    if (window.electronAPI.onTtsStreamAudio) {
+      window.electronAPI.onTtsStreamAudio(playTtsAudio);
+    }
+    if (window.electronAPI.onTtsCancel) {
+      window.electronAPI.onTtsCancel(stopAllTts);
+    }
   }
 
   // ── Window Controls ──────────────────────────────────────────

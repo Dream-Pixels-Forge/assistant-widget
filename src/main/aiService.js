@@ -113,20 +113,21 @@ Then I will execute it and show you the result. Keep the JSON on its own line at
   }
 
   // Stream response from Ollama — with tool calling loop
-  async getResponseStream(userInput, onChunk) {
+  async getResponseStream(userInput, onChunk, onTtsChunk) {
     this.conversationHistory.push({ role: 'user', content: userInput });
 
     // Detect code tasks for model selection
     const isCodeTask = /code|function|class|debug|test|script|implement|refactor/i.test(userInput);
 
     try {
-      await this._runToolLoop(onChunk, 0, isCodeTask);
+      await this._runToolLoop(onChunk, onTtsChunk, 0, isCodeTask);
     } catch (error) {
       console.error('Ollama stream error:', error.message);
       const fallback = error.code === 'ECONNREFUSED'
         ? `⚠️ Ollama is not running. Start it with:\n\n  ollama serve\n\nThen try again.`
         : `Sorry, I hit an error: ${error.message}`;
       onChunk(fallback);
+      if (onTtsChunk) onTtsChunk(fallback);
       this.conversationHistory.push({ role: 'assistant', content: fallback });
     }
 
@@ -134,7 +135,7 @@ Then I will execute it and show you the result. Keep the JSON on its own line at
   }
 
   // Internal tool-calling loop
-  async _runToolLoop(onChunk, depth = 0, isCodeTask = false) {
+  async _runToolLoop(onChunk, onTtsChunk, depth = 0, isCodeTask = false) {
     if (depth > 5) {
       onChunk('\n\n[Reached max tool call depth]');
       return;
@@ -165,6 +166,7 @@ Then I will execute it and show you the result. Keep the JSON on its own line at
 
       if (textPart) {
         this.conversationHistory.push({ role: 'assistant', content: textPart });
+        if (onTtsChunk) onTtsChunk(textPart);
       } else {
         onChunk('\x00clear_stream');
       }
@@ -189,9 +191,10 @@ Then I will execute it and show you the result. Keep the JSON on its own line at
         this.conversationHistory = this.conversationHistory.slice(-40);
       }
 
-      await this._runToolLoop(onChunk, depth + 1, isCodeTask);
+      await this._runToolLoop(onChunk, onTtsChunk, depth + 1, isCodeTask);
     } else {
       this.conversationHistory.push({ role: 'assistant', content: fullResponse });
+      if (onTtsChunk) onTtsChunk(fullResponse);
       if (this.conversationHistory.length > 40) {
         this.conversationHistory = this.conversationHistory.slice(-40);
       }

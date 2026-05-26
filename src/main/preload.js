@@ -9,9 +9,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   minimizeWindow: () => ipcRenderer.send('minimizeWindow'),
   closeWindow: () => ipcRenderer.send('closeWindow'),
 
-  // Legacy response (one-shot)
-  receiveResponse: (callback) => ipcRenderer.on('response', (_e, r) => callback(r)),
-
   // Streaming response
   onResponseChunk: (callback) => ipcRenderer.on('response-chunk', (_e, chunk) => callback(chunk)),
   onResponseDone: (callback) => ipcRenderer.on('response-done', () => callback()),
@@ -33,6 +30,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   ttsGetStatus: () => ipcRenderer.invoke('tts:getStatus'),
   onTtsAudio: (callback) => ipcRenderer.on('tts:audio', (_e, base64) => callback(base64)),
   onTtsStreamAudio: (callback) => ipcRenderer.on('tts:stream-audio', (_e, base64) => callback(base64)),
+  onTtsCancel: (callback) => ipcRenderer.on('tts:cancel', () => callback()),
 
   // Models
   listModels: () => ipcRenderer.invoke('models:list'),

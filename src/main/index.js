@@ -116,11 +116,18 @@ ipcMain.handle('settings:getAll', async () => {
 ipcMain.handle('sendUserInput', async (event, input) => {
   if (!mainWindow || !mainWindow.webContents) return;
   try {
+    streamingTts.cancel();
+    mainWindow.webContents.send('tts:cancel');
     streamingTts.start().catch(() => {});
-    await aiService.getResponseStream(input, (chunk) => {
-      mainWindow.webContents.send('response-chunk', chunk);
-      streamingTts.feed(chunk);
-    });
+
+    await aiService.getResponseStream(input,
+      (chunk) => {
+        mainWindow.webContents.send('response-chunk', chunk);
+      },
+      (text) => {
+        streamingTts.feed(text);
+      }
+    );
     await streamingTts.flush();
     mainWindow.webContents.send('response-done');
   } catch (error) {

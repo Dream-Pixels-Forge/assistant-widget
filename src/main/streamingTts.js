@@ -23,8 +23,15 @@ class StreamingTTS {
     }
   }
 
+  cancel() {
+    this.buffer = '';
+    this.queue = [];
+    this.speaking = false;
+    this.flushing = false;
+  }
+
   feed(chunk) {
-    if (!chunk || this.queue.length > 10) return;
+    if (!chunk || typeof chunk !== 'string' || this.queue.length > 10) return;
     this.buffer += chunk;
     this._processBuffer();
   }
