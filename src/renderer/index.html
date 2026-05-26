@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assistant Widget</title>
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+    <div id="widget">
+        <!-- Header: clock + weather -->
+        <div id="top-bar">
+            <div id="top-row">
+                <div id="big-time">05:08</div>
+                <div id="weather">
+                    <div id="weather-temp">--°</div>
+                    <div id="weather-icon">☀️</div>
+                </div>
+                <div id="spacer"></div>
+                <div id="win-controls">
+                    <button id="settingsBtn" class="win-btn settings">⚙</button>
+                    <button id="minimizeBtn" class="win-btn">―</button>
+                    <button id="closeBtn" class="win-btn close">✕</button>
+                </div>
+            </div>
+            <div id="bottom-row">
+                <div id="greeting">Good morning</div>
+                <div id="date-display">Tue, May 26</div>
+            </div>
+        </div>
+
+        <div id="content">
+            <!-- Voice section -->
+            <div id="voice-section">
+                <button id="micBtn" class="mic-btn">
+                    <svg id="mic-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+                        <path d="M19 10v1a7 7 0 0 1-14 0v-1" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+                        <path d="M12 18v3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+                    </svg>
+                </button>
+                <span id="status">Click to speak</span>
+            </div>
+
+            <!-- Waveform indicator -->
+            <div id="waveform-container">
+                <canvas id="waveform-canvas" width="120" height="28"></canvas>
+            </div>
+
+            <!-- Conversation -->
+            <div id="conversation" role="log"></div>
+
+            <!-- Input -->
+            <div id="input-section">
+                <input type="text" id="textInput" placeholder="Message..." autofocus>
+                <button id="sendBtn">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Panel (hidden by default) -->
+    <div id="settings-overlay" class="hidden">
+        <div id="settings-panel">
+            <div id="settings-header">
+                <div id="settings-tabs">
+                    <span class="settings-tab active" data-tab="settings">Settings</span>
+                    <span class="settings-tab" data-tab="profile">Profile</span>
+                </div>
+                <button id="settings-close" class="win-btn close">✕</button>
+            </div>
+
+            <!-- Tab: Settings -->
+            <div id="tab-settings" class="tab-content active">
+                <div class="setting-group">
+                    <label class="setting-label">AI Model</label>
+                    <select id="model-select"><option>Loading...</option></select>
+                </div>
+                <div class="setting-group">
+                    <label class="setting-label">Code Model</label>
+                    <select id="codemodel-select"><option>Loading...</option></select>
+                </div>
+                <div class="setting-group">
+                    <label class="setting-label">Workspace Directory</label>
+                    <div id="workspace-selector">
+                        <input type="text" id="workspace-path" class="setting-input" readonly placeholder="~/Workspace">
+                        <button id="workspace-browse-btn" class="setting-btn" style="width:auto;padding:7px 12px;">Browse</button>
+                    </div>
+                    <div id="workspace-subfolders" class="workspace-subfolders"></div>
+                </div>
+                <div class="setting-group">
+                    <label class="setting-label">Text-to-Speech</label>
+                    <div id="tts-status">Checking...</div>
+                    <button id="tts-download-btn" class="setting-btn">Download TTS Model</button>
+                </div>
+                <div class="setting-group">
+                    <label class="setting-label">TTS Voice</label>
+                    <select id="voice-select"><option>af_heart</option></select>
+                </div>
+                <div class="setting-group">
+                    <label class="setting-label">Speech-to-Text</label>
+                    <select id="stt-mode">
+                        <option value="browser">Browser STT (Web Speech)</option>
+                        <option value="local">Local Whisper (Offline)</option>
+                    </select>
+                    <div id="stt-status" style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:4px;">
+                        Checking...
+                    </div>
+                    <button id="stt-download-btn" class="setting-btn">Download Whisper Model</button>
+                </div>
+            </div>
+
+            <!-- Tab: Profile -->
+            <div id="tab-profile" class="tab-content">
+                <div class="setting-group">
+                    <label class="setting-label">Your Name</label>
+                    <input type="text" id="profile-name" class="setting-input" placeholder="e.g. Alex" maxlength="40">
+                </div>
+                <div class="setting-group">
+                    <label class="setting-label">What You Do</label>
+                    <input type="text" id="profile-role" class="setting-input" placeholder="e.g. Software Engineer, Student..." maxlength="60">
+                </div>
+                <div class="setting-group">
+                    <label class="setting-label">Assistant Persona</label>
+                    <textarea id="profile-persona" class="setting-textarea" rows="4" placeholder="How should the assistant behave? e.g. You are a friendly coding mentor...">You are a helpful AI assistant. Be concise, warm, and practical.</textarea>
+                </div>
+                <div class="setting-group">
+                    <label class="setting-label">Extra Context</label>
+                    <textarea id="profile-context" class="setting-textarea" rows="3" placeholder="Any extra info for the AI (goals, interests, preferences...)" maxlength="300"></textarea>
+                </div>
+                <button id="profile-save-btn" class="setting-btn primary">Save Profile</button>
+                <div id="profile-status" style="font-size:12px;color:rgba(100,220,100,0.7);margin-top:6px;display:none;">✓ Saved</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="./script.js"></script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+{
+  "name": "assistant-widget",
+  "version": "0.1.0",
+  "description": "A cross-platform desktop AI assistant for writing, speaking, command execution, and task delegation",
+  "main": "src/main/index.js",
+  "scripts": {
+    "dev": "electron .",
+    "build": "electron-builder",
+    "test": "jest"
+  },
+  "keywords": [
+    "ai",
+    "assistant",
+    "voice",
+    "dictation",
+    "productivity",
+    "electron"
+  ],
+  "author": "Assistant Widget Team",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^30.5.1",
+    "electron-builder": "^24.0.0"
+  },
+  "dependencies": {
+    "kokoro-js": "^1.2.1",
+    "openai": "^6.39.0"
+  }
+}

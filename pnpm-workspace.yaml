@@ -1,0 +1,5 @@
+allowBuilds:
+  electron: true
+  onnxruntime-node: true
+  protobufjs: true
+  sharp: true
