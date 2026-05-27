@@ -1,5 +1,8 @@
 # Assistant Widget
 
+<img width="404" height="466" alt="Screenshot from 2026-05-26 16-34-16" src="https://github.com/user-attachments/assets/36a8b1de-94bf-4b6f-98d1-e7761790f897" />
+
+
 A local-first, privacy-focused desktop AI assistant powered by **Ollama** and built with **Electron**. Features real-time streaming responses, voice input/output, an analogue clock, live weather, and full user customization.
 
 ## Features
